@@ -1,68 +1,65 @@
-const http = require('http');
-const path = require('path');
 const express = require('express');
+const http = require('http');
 const { WebSocketServer } = require('ws');
+
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 
-const SERIAL_PORT = process.env.SERIAL_PORT || '/dev/ttyUSB0';
-const BAUD_RATE = 115200;
-const HOST = '127.0.0.1';
-const PORT = 3000;
+const portPath = process.env.SERIAL_PORT || '/dev/ttyUSB0';
 
-const app = express();
-app.use(express.static(path.join(__dirname, 'public')));
-
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
-
-function broadcast(payload) {
-  const message = JSON.stringify(payload);
-  wss.clients.forEach((client) => {
-    if (client.readyState === 1) {
-      client.send(message);
-    }
-  });
-}
-
-wss.on('connection', () => {
-  console.log('[ws] client connected');
-});
-
+// --- Serial ---
 const serial = new SerialPort({
-  path: SERIAL_PORT,
-  baudRate: BAUD_RATE,
+  path: portPath,
+  baudRate: 115200
 });
 
 const parser = serial.pipe(new ReadlineParser({ delimiter: '\n' }));
 
+// --- Web ---
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+
+app.use(express.static('public'));
+
+let lastEvent = null;
+
+parser.on('data', (line) => {
+  try {
+    const data = JSON.parse(line);
+    lastEvent = data;
+
+    console.log('EVENT:', data);
+
+    // WebSocketで全クライアントに送信
+    wss.clients.forEach((client) => {
+      if (client.readyState === 1) {
+        client.send(JSON.stringify(data));
+      }
+    });
+
+  } catch (e) {
+    console.log('RAW:', line);
+  }
+});
+
 serial.on('open', () => {
-  console.log(`[serial] opened ${SERIAL_PORT} @ ${BAUD_RATE}`);
+  console.log('Serial connected:', portPath);
 });
 
 serial.on('error', (err) => {
-  console.error('[serial] port error:', err.message);
+  console.error('Serial error:', err.message);
 });
 
-parser.on('data', (line) => {
-  const trimmed = line.trim();
-  if (!trimmed) {
-    return;
-  }
+// --- WebSocket接続時 ---
+wss.on('connection', (ws) => {
+  console.log('Client connected');
 
-  try {
-    const parsed = JSON.parse(trimmed);
-    if (!parsed || typeof parsed !== 'object') {
-      return;
-    }
-
-    broadcast(parsed);
-  } catch (err) {
-    console.error('[serial] JSON parse error:', err.message, '| line:', trimmed);
+  if (lastEvent) {
+    ws.send(JSON.stringify(lastEvent));
   }
 });
 
-server.listen(PORT, HOST, () => {
-  console.log(`[http] http://${HOST}:${PORT}`);
-  console.log(`[serial] waiting on ${SERIAL_PORT}`);
+server.listen(3000, () => {
+  console.log('Server running: http://localhost:3000');
 });
