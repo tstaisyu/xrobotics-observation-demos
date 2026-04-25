@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>log-003 serial ui</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>log-003 serial ui</h1>
+
+      <section class="status-card" id="statusCard">
+        <div class="label">Current State</div>
+        <div class="state" id="stateText">WAITING</div>
+      </section>
+
+      <section class="metrics">
+        <div class="metric">
+          <div class="label">Delta</div>
+          <div class="value" id="deltaText">-</div>
+        </div>
+        <div class="metric">
+          <div class="label">Last Received</div>
+          <div class="value" id="timeText">-</div>
+        </div>
+      </section>
+
+      <section class="logs">
+        <div class="label">Recent Events (10)</div>
+        <ul id="logList"></ul>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

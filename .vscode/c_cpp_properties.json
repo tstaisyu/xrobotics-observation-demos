@@ -1,0 +1,21 @@
+{
+  "version": 4,
+  "configurations": [
+    {
+      "name": "log-003-m5stack",
+      "includePath": [
+        "${workspaceFolder}/.vscode/intellisense",
+        "${workspaceFolder}/demos/log-003-serial-ui/firmware",
+        "${workspaceFolder}/demos/log-003-serial-ui/firmware/src"
+      ],
+      "defines": [
+        "ARDUINO=10805",
+        "ESP32=1"
+      ],
+      "compilerPath": "/usr/bin/g++",
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "linux-gcc-x64"
+    }
+  ]
+}

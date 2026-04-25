@@ -1,0 +1,119 @@
+:root {
+  --bg: #f4f4f2;
+  --panel: #ffffff;
+  --text: #222222;
+  --stable: #1f7a3f;
+  --spike: #b42318;
+  --muted: #666666;
+  --line: #dddddd;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  margin: 0 0 16px;
+  font-size: 24px;
+}
+
+.status-card,
+.metrics,
+.logs {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.label {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.state {
+  font-size: 36px;
+  font-weight: 700;
+}
+
+.status-stable .state {
+  color: var(--stable);
+}
+
+.status-spike .state {
+  color: var(--spike);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metric {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.value {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+#logList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+#logList li {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+#logList li.stable {
+  border-left: 6px solid var(--stable);
+}
+
+#logList li.spike {
+  border-left: 6px solid var(--spike);
+}
+
+@media (max-width: 640px) {
+  .state {
+    font-size: 28px;
+  }
+
+  .value {
+    font-size: 20px;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}
