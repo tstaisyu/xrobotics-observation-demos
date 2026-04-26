@@ -36,13 +36,17 @@ struct MockSerial {
 };
 
 struct MockButton {
+  bool isPressed();
+  bool pressedFor(unsigned long ms);
   bool wasPressed();
 };
 
 struct MockM5Class {
   MockLcd Lcd;
   MockIMU IMU;
+  MockButton BtnA;
   MockButton BtnB;
+  MockButton BtnC;
   void begin();
   void update();
 };
