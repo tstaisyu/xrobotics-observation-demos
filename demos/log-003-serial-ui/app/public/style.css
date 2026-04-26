@@ -6,18 +6,30 @@ body {
 }
 
 #state {
-  font-size: 40px;
-  margin-bottom: 10px;
+  font-size: 32px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 2px solid #555;
 }
 
-.STABLE {
+.MONITORING {
   color: #0f0;
+  border-color: #0f0;
 }
 
-.MOTION_SPIKE {
+.PROTECT_MODE {
   color: #f00;
+  border-color: #f00;
+  background: #300;
+}
+
+#delta,
+#time {
+  font-size: 20px;
+  margin-bottom: 8px;
 }
 
 #logs {
   margin-top: 20px;
+  font-size: 14px;
 }

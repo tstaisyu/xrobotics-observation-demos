@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cmath>
+#include <cstring>
+
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
@@ -10,3 +13,5 @@ typedef int int32_t;
 unsigned long millis();
 void delay(unsigned long ms);
 
+using std::strcmp;
+using std::sqrt;

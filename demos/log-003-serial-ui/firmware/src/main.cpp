@@ -2,113 +2,136 @@
 #include <M5Stack.h>
 #include <math.h>
 
-enum MotionState {
-  STABLE,
-  MOTION_SPIKE
+enum SystemMode {
+  MONITORING,
+  PROTECT_MODE
 };
 
-const float kSpikeThreshold = 0.35f;
+SystemMode currentMode = MONITORING;
 
-MotionState currentState = STABLE;
-MotionState previousState = STABLE;
+const float spikeThreshold = 0.35f;
+const int protectSpikeLimit = 3;
+const unsigned long spikeCooldownMs = 600;
 
 float prevAx = 0.0f;
 float prevAy = 0.0f;
 float prevAz = 0.0f;
-float currentDelta = 0.0f;
-bool hasPreviousAccel = false;
+bool hasPrevAccel = false;
 
-const char* toStateString(MotionState state) {
-  switch (state) {
-    case STABLE:
-      return "STABLE";
-    case MOTION_SPIKE:
-      return "MOTION_SPIKE";
-    default:
-      return "UNKNOWN";
+int spikeCount = 0;
+unsigned long lastSpikeTime = 0;
+
+const char* modeToString(SystemMode mode) {
+  switch (mode) {
+    case MONITORING: return "MONITORING";
+    case PROTECT_MODE: return "PROTECT_MODE";
+    default: return "UNKNOWN";
   }
 }
 
-void drawScreen(float ax, float ay, float az, float delta, MotionState state) {
+void sendEvent(const char* eventType, float delta) {
+  Serial.print("{\"event\":\"");
+  Serial.print(eventType);
+  Serial.print("\",\"mode\":\"");
+  Serial.print(modeToString(currentMode));
+  Serial.print("\",\"spikeCount\":");
+  Serial.print(spikeCount);
+  Serial.print(",\"delta\":");
+  Serial.print(delta, 3);
+  Serial.print(",\"timestamp\":");
+  Serial.print(millis());
+  Serial.println("}");
+}
+
+void drawScreen(float delta) {
   M5.Lcd.fillScreen(BLACK);
   M5.Lcd.setCursor(0, 0);
   M5.Lcd.setTextSize(2);
 
   M5.Lcd.setTextColor(WHITE);
-  M5.Lcd.println("log-003 serial ui");
-  M5.Lcd.println();
-  M5.Lcd.printf("ax: %.2f\n", ax);
-  M5.Lcd.printf("ay: %.2f\n", ay);
-  M5.Lcd.printf("az: %.2f\n", az);
-  M5.Lcd.println();
-  M5.Lcd.printf("delta: %.3f\n", delta);
-  M5.Lcd.printf("th: %.2f\n", kSpikeThreshold);
+  M5.Lcd.println("Spike Protect Demo");
   M5.Lcd.println();
 
-  if (state == MOTION_SPIKE) {
+  if (currentMode == PROTECT_MODE) {
     M5.Lcd.setTextColor(RED);
-    M5.Lcd.println("STATE: MOTION_SPIKE");
   } else {
     M5.Lcd.setTextColor(GREEN);
-    M5.Lcd.println("STATE: STABLE");
   }
-}
 
-void emitStateChange(MotionState state, float delta, unsigned long timestampMs) {
-  Serial.print("{\"state\":\"");
-  Serial.print(toStateString(state));
-  Serial.print("\",\"delta\":");
-  Serial.print(delta, 3);
-  Serial.print(",\"timestamp\":");
-  Serial.print(timestampMs);
-  Serial.println("}");
+  M5.Lcd.printf("MODE: %s\n", modeToString(currentMode));
+  M5.Lcd.printf("SPIKES: %d / %d\n", spikeCount, protectSpikeLimit);
+  M5.Lcd.printf("delta: %.3f\n", delta);
+
+  M5.Lcd.println();
+  M5.Lcd.setTextColor(CYAN);
+  M5.Lcd.println("BtnB: RESET");
+
+  if (currentMode == PROTECT_MODE) {
+    M5.Lcd.println();
+    M5.Lcd.setTextColor(RED);
+    M5.Lcd.println("ACTION REQUIRED");
+  }
 }
 
 void setup() {
   M5.begin();
   M5.IMU.Init();
-
   Serial.begin(115200);
 
   M5.Lcd.setRotation(1);
-  M5.Lcd.setTextSize(2);
   M5.Lcd.fillScreen(BLACK);
+
+  sendEvent("SYSTEM_START", 0.0f);
 }
 
 void loop() {
   M5.update();
 
+  if (M5.BtnB.wasPressed()) {
+    currentMode = MONITORING;
+    spikeCount = 0;
+    sendEvent("RESET", 0.0f);
+  }
+
   float ax, ay, az;
   M5.IMU.getAccelData(&ax, &ay, &az);
 
+  float delta = 0.0f;
   unsigned long now = millis();
 
-  if (hasPreviousAccel) {
+  if (hasPrevAccel) {
     float dx = ax - prevAx;
     float dy = ay - prevAy;
     float dz = az - prevAz;
-    currentDelta = static_cast<float>(sqrt(dx * dx + dy * dy + dz * dz));
+    delta = sqrtf(dx * dx + dy * dy + dz * dz);
 
-    if (currentDelta >= kSpikeThreshold) {
-      currentState = MOTION_SPIKE;
-    } else {
-      currentState = STABLE;
-    }
+    bool spikeDetected =
+      delta >= spikeThreshold &&
+      now - lastSpikeTime >= spikeCooldownMs;
 
-    if (currentState != previousState) {
-      emitStateChange(currentState, currentDelta, now);
-      previousState = currentState;
+    if (spikeDetected) {
+      lastSpikeTime = now;
+
+      if (currentMode == MONITORING) {
+        spikeCount++;
+        sendEvent("MOTION_SPIKE", delta);
+
+        if (spikeCount >= protectSpikeLimit) {
+          currentMode = PROTECT_MODE;
+          sendEvent("ENTER_PROTECT_MODE", delta);
+        }
+      } else {
+        sendEvent("PROTECT_MODE_ACTIVE", delta);
+      }
     }
   } else {
-    hasPreviousAccel = true;
-    previousState = currentState;
+    hasPrevAccel = true;
   }
 
   prevAx = ax;
   prevAy = ay;
   prevAz = az;
 
-  drawScreen(ax, ay, az, currentDelta, currentState);
-
+  drawScreen(delta);
   delay(100);
 }
