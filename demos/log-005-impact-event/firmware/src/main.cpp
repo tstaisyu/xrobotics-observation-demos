@@ -23,26 +23,16 @@ const char* levelForDelta(float delta) {
   return "LOW";
 }
 
-void drawScreen(const char* level, float delta) {
+void drawFixedScreen() {
   M5.Lcd.fillScreen(BLACK);
   M5.Lcd.setCursor(0, 0);
   M5.Lcd.setTextSize(2);
-  M5.Lcd.setTextColor(WHITE);
-  M5.Lcd.println("IMPACT EVENT");
+  M5.Lcd.setTextColor(GREEN);
+  M5.Lcd.println("IMPACT LOGGER");
+  M5.Lcd.println("IMU ACTIVE");
   M5.Lcd.println();
-
-  if (strcmp(level, "HIGH") == 0) {
-    M5.Lcd.setTextColor(RED);
-  } else if (strcmp(level, "MEDIUM") == 0) {
-    M5.Lcd.setTextColor(YELLOW);
-  } else {
-    M5.Lcd.setTextColor(GREEN);
-  }
-
-  M5.Lcd.printf("LEVEL: %s\n", level);
   M5.Lcd.setTextColor(WHITE);
-  M5.Lcd.printf("delta: %.3f\n", delta);
-  M5.Lcd.printf("threshold: %.2f\n", kImpactThreshold);
+  M5.Lcd.println("SERIAL JSON OUT");
 }
 
 void emitImpactEvent(const char* level, float delta, unsigned long timestampMs) {
@@ -61,7 +51,7 @@ void setup() {
   Serial.begin(115200);
 
   M5.Lcd.setRotation(1);
-  drawScreen("LOW", 0.0f);
+  drawFixedScreen();
 }
 
 void loop() {
@@ -72,15 +62,12 @@ void loop() {
 
   float magnitude = sqrtf(ax * ax + ay * ay + az * az);
   float delta = fabsf(magnitude - kGravityBaseline);
-  const char* level = levelForDelta(delta);
   unsigned long now = millis();
-
-  drawScreen(level, delta);
 
   if (delta >= kImpactThreshold && now - lastImpactTime >= kImpactCooldownMs) {
     lastImpactTime = now;
     prevDelta = delta;
-    emitImpactEvent(level, delta, now);
+    emitImpactEvent(levelForDelta(delta), delta, now);
   }
 
   delay(100);
