@@ -1,0 +1,16 @@
+{
+  "name": "log-005-impact-event-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Observation demo: M5Stack serial -> WebSocket -> browser UI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@serialport/parser-readline": "^12.0.0",
+    "express": "^4.22.1",
+    "serialport": "^12.0.0",
+    "ws": "^8.20.0"
+  }
+}

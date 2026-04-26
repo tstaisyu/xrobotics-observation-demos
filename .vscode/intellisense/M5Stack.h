@@ -7,6 +7,7 @@ static const int WHITE = 1;
 static const int RED = 2;
 static const int GREEN = 3;
 static const int CYAN = 4;
+static const int YELLOW = 5;
 
 struct MockLcd {
   void fillScreen(int color);
