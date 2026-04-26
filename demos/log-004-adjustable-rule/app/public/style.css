@@ -1,0 +1,57 @@
+body {
+  font-family: monospace;
+  background: #111;
+  color: #eee;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+#state {
+  font-size: 30px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 2px solid #555;
+}
+
+.MONITORING {
+  color: #0f0;
+  border-color: #0f0;
+}
+
+.PROTECT_MODE {
+  color: #f00;
+  border-color: #f00;
+  background: #300;
+}
+
+#delta,
+#time {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+#controls {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid #444;
+}
+
+input {
+  font-size: 20px;
+  width: 80px;
+  margin-left: 8px;
+}
+
+button {
+  font-size: 18px;
+  margin-left: 8px;
+  padding: 6px 12px;
+}
+
+#logs {
+  margin-top: 20px;
+  font-size: 14px;
+}

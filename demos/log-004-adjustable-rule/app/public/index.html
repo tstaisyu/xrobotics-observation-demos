@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Adjustable Rule Monitor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Adjustable Rule Monitor</h1>
+
+  <div id="state">状態: -</div>
+  <div id="delta">変化量: -</div>
+  <div id="time">時刻: -</div>
+
+  <section id="controls">
+    <h2>判定ルール</h2>
+    <label>
+      保護モード移行回数:
+      <input id="limitInput" type="number" min="1" max="20" value="3">
+    </label>
+    <button id="applyButton">ルールを反映</button>
+    <button id="resetButton">リセット</button>
+  </section>
+
+  <h2>Logs</h2>
+  <ul id="logs"></ul>
+
+  <script src="app.js"></script>
+</body>
+</html>

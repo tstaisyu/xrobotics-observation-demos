@@ -10,6 +10,19 @@ typedef signed char int8_t;
 typedef short int16_t;
 typedef int int32_t;
 
+class String {
+ public:
+  String();
+  String(const char*);
+  void trim();
+  bool startsWith(const char*) const;
+  String substring(int) const;
+  int toInt() const;
+  String& operator=(const char*);
+  String& operator+=(char);
+  bool operator==(const char*) const;
+};
+
 unsigned long millis();
 void delay(unsigned long ms);
 

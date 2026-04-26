@@ -25,6 +25,8 @@ struct MockIMU {
 
 struct MockSerial {
   void begin(unsigned long baud);
+  int available();
+  char read();
   void print(const char* text);
   void print(int value);
   void print(unsigned long value);
