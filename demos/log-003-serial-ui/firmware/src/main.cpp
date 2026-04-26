@@ -43,36 +43,6 @@ void sendEvent(const char* eventType, float delta) {
   Serial.println("}");
 }
 
-void drawScreen(float delta) {
-  M5.Lcd.fillScreen(BLACK);
-  M5.Lcd.setCursor(0, 0);
-  M5.Lcd.setTextSize(2);
-
-  M5.Lcd.setTextColor(WHITE);
-  M5.Lcd.println("Spike Protect Demo");
-  M5.Lcd.println();
-
-  if (currentMode == PROTECT_MODE) {
-    M5.Lcd.setTextColor(RED);
-  } else {
-    M5.Lcd.setTextColor(GREEN);
-  }
-
-  M5.Lcd.printf("MODE: %s\n", modeToString(currentMode));
-  M5.Lcd.printf("SPIKES: %d / %d\n", spikeCount, protectSpikeLimit);
-  M5.Lcd.printf("delta: %.3f\n", delta);
-
-  M5.Lcd.println();
-  M5.Lcd.setTextColor(CYAN);
-  M5.Lcd.println("BtnB: RESET");
-
-  if (currentMode == PROTECT_MODE) {
-    M5.Lcd.println();
-    M5.Lcd.setTextColor(RED);
-    M5.Lcd.println("ACTION REQUIRED");
-  }
-}
-
 void setup() {
   M5.begin();
   M5.IMU.Init();
@@ -80,6 +50,11 @@ void setup() {
 
   M5.Lcd.setRotation(1);
   M5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setCursor(0, 0);
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.setTextColor(GREEN);
+  M5.Lcd.println("SENSOR NODE");
+  M5.Lcd.println("IMU ACTIVE");
 
   sendEvent("SYSTEM_START", 0.0f);
 }
@@ -131,7 +106,5 @@ void loop() {
   prevAx = ax;
   prevAy = ay;
   prevAz = az;
-
-  drawScreen(delta);
   delay(100);
 }
