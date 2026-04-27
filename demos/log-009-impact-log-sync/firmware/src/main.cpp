@@ -48,6 +48,9 @@ struct MockSerialEx : MockSerial {
 #define SERIAL_PORT_REF Serial
 #endif
 
+void clearStoredLogs();
+void sendClearDone();
+
 const char* levelForDelta(float delta) {
   if (delta >= kHighThreshold) {
     return "HIGH";
@@ -116,6 +119,17 @@ void drawScreen() {
   }
 }
 
+void drawLogsClearedScreen() {
+  M5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setCursor(0, 0);
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.setTextColor(GREEN);
+  M5.Lcd.println("LOGS CLEARED");
+  M5.Lcd.println();
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.println("COUNT: 0");
+}
+
 void refreshLatestFromLog() {
   if (impactCount == 0) {
     latestDelta = 0.0f;
@@ -156,12 +170,17 @@ void loadPersistentLog() {
   refreshLatestFromLog();
 }
 
-void clearPersistentLog() {
+void clearStoredLogs() {
   impactCount = 0;
+  memset(impactLog, 0, sizeof(impactLog));
   preferences.clear();
   refreshLatestFromLog();
   currentMode = LIVE_MODE;
-  drawScreen();
+  drawLogsClearedScreen();
+}
+
+void sendClearDone() {
+  Serial.println("CLEAR_DONE");
 }
 
 void emitImpactEvent(const ImpactEvent& event) {
@@ -216,6 +235,12 @@ void storeImpactEvent(float delta, const char* level, unsigned long timestampMs)
 void handleCommand(const char* command) {
   if (strcmp(command, "SYNC_REQUEST") == 0) {
     emitSyncDump();
+    return;
+  }
+
+  if (strcmp(command, "CLEAR_LOGS") == 0) {
+    clearStoredLogs();
+    sendClearDone();
   }
 }
 
@@ -244,7 +269,7 @@ void handleButtons() {
   if (currentMode == LIVE_MODE) {
     if (M5.BtnC.pressedFor(kClearHoldMs) && !clearHandled) {
       clearHandled = true;
-      clearPersistentLog();
+      clearStoredLogs();
     }
 
     if (!M5.BtnC.isPressed()) {

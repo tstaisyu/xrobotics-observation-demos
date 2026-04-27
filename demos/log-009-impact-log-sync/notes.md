@@ -9,9 +9,12 @@ Synchronize impact logs stored persistently on the M5Stack to a connected PC ove
   - Responds to `SYNC_REQUEST` by outputting saved logs between `SYNC_START` and `SYNC_END`
 - `app/server.js`
   - Opens Serial
-  - Sends `SYNC_REQUEST` automatically
-  - Receives synced logs and saves them to `synced_logs.json`
-  - Broadcasts logs to browser clients over WebSocket
+  - Waits for manual `Sync Logs` request from UI
+  - Sends `SYNC_REQUEST` and receives `SYNC_START` ... `SYNC_END`
+  - Sends `CLEAR_LOGS` only after UI confirmation
+  - Receives `CLEAR_DONE` from M5
+  - Saves synced logs to `synced_logs.json`
+  - Broadcasts logs and status to browser clients over WebSocket
 - `app/public/*`
   - Displays synced count, latest level, latest delta, and full log list
 
@@ -33,7 +36,11 @@ cd demos/log-009-impact-log-sync/app
 npm install
 SERIAL_PORT=/dev/ttyUSB0 npm start
 ```
-5. Confirm the server sends `SYNC_REQUEST`
-6. Confirm the M5 returns `SYNC_START` ... `SYNC_END`
-7. Open `http://localhost:3000`
-8. Confirm `COUNT`, latest level, latest delta, and synced logs are displayed
+5. Open `http://localhost:3000`
+6. Press `Sync Logs`
+7. Confirm the M5 returns `SYNC_START` ... `SYNC_END`
+8. Confirm synced logs appear in UI
+9. Confirm the deletion dialog appears only after sync success
+10. Cancel and re-sync to confirm old logs still remain
+11. Press OK and confirm `CLEAR_DONE` is returned
+12. Re-sync and confirm old logs are no longer returned

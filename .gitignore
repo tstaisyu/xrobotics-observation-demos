@@ -2,3 +2,4 @@ node_modules/
 .pio/
 .env
 .DS_Store
+demos/log-009-impact-log-sync/app/synced_logs.json
